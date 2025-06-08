@@ -5,7 +5,8 @@ import { POAPService } from '@/services/poapService';
 export async function POST(request: NextRequest) {
   try {
   
-     const apiKey = "xck5dwyBGgx6AE4sng883ZDCVM2ddMqzIS2t6ube5TdmXESKNU0OROczq4Jj4RRKbtskjmqS4sKKSf3OWVq4HDKtYt2aGPYWGKyr22DUWrHzAMCK3SYaSPZW1tr25ikE";
+     const apiKey = process.env.POAP_API_KEY!;
+
   
     const body = await request.json();
   
