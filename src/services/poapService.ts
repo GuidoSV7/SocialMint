@@ -26,39 +26,39 @@ export class POAPService {
   }
 
   
-  async createDelivery(data: POAPDeliveryRequest ): Promise<any> {
+  // async createDelivery(data: POAPDeliveryRequest ): Promise<any> {
 
-    const eventResponse =  await this.getEventInfo(data.eventId);
-    const dataEvent = eventResponse;
-    console.log(dataEvent);
-    const slug = dataEvent.name.toLowerCase().replace(/ /g, '-');
+  //   const eventResponse =  await this.getEventInfo(data.eventId);
+  //   const dataEvent = eventResponse;
+  //   console.log(dataEvent);
+  //   const slug = dataEvent.name.toLowerCase().replace(/ /g, '-');
 
-    const dataDelivery = {
-      ...data,
-      slug: slug,
-      image: dataEvent.image_url,
-      page_title_image: dataEvent.image_url,
-      event_ids: data.eventId,
-      metadata_title: dataEvent.name,
-      metadata_description: dataEvent.description,
-      card_title: "RECLAMA TU POAP!",
-      card_text: "¡Gracias por asistir a nuestro evento! 🎉",
-      page_title: dataEvent.name,
-      page_text: dataEvent.description,
+  //   const dataDelivery = {
+  //     ...data,
+  //     slug: slug,
+  //     image: dataEvent.image_url,
+  //     page_title_image: dataEvent.image_url,
+  //     event_ids: data.eventId,
+  //     metadata_title: dataEvent.name,
+  //     metadata_description: dataEvent.description,
+  //     card_title: "RECLAMA TU POAP!",
+  //     card_text: "¡Gracias por asistir a nuestro evento! 🎉",
+  //     page_title: dataEvent.name,
+  //     page_text: dataEvent.description,
 
-    }  
+  //   }  
 
-    try {
-      const response: AxiosResponse<any> = await this.client.post('/deliveries', dataDelivery);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const message = error.response?.data?.message || error.response?.data || error.message;
-        throw new Error(`POAP API Error: ${error.response?.status} - ${message}`);
-      }
-      throw error;
-    }
-  }
+  //   try {
+  //     const response: AxiosResponse<any> = await this.client.post('/deliveries', dataDelivery);
+  //     return response.data;
+  //   } catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       const message = error.response?.data?.message || error.response?.data || error.message;
+  //       throw new Error(`POAP API Error: ${error.response?.status} - ${message}`);
+  //     }
+  //     throw error;
+  //   }
+  // }
 
 
 
