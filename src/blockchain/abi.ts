@@ -33,12 +33,30 @@ export const abi = [
                 "internalType": "string[]",
                 "name": "hashtags",
                 "type": "string[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "durationSeconds",
+                "type": "uint256"
             }
         ],
         "name": "createEvent",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "string",
+                "name": "eventCode",
+                "type": "string"
+            }
+        ],
+        "name": "EventClosed",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -87,6 +105,43 @@ export const abi = [
     {
         "inputs": [
             {
+                "internalType": "bytes",
+                "name": "performData",
+                "type": "bytes"
+            }
+        ],
+        "name": "performUpkeep",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+            }
+        ],
+        "name": "checkUpkeep",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "upkeepNeeded",
+                "type": "bool"
+            },
+            {
+                "internalType": "bytes",
+                "name": "performData",
+                "type": "bytes"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "string",
                 "name": "code",
                 "type": "string"
@@ -113,6 +168,21 @@ export const abi = [
                 "internalType": "address[]",
                 "name": "participants",
                 "type": "address[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "startTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "duration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "closed",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",

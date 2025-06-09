@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const contractABI = [
-    "event EventoImportante(address indexed from, uint256 valor)"
+    "event EventClosed(string indexed eventCode)" // <- Evento real
 ];
 
 const provider = new ethers.WebSocketProvider(process.env.WEBSOCKET_URL as string);
@@ -15,15 +15,12 @@ const contract = new ethers.Contract(
     provider
 );
 
-export function startListening() {
+export const startListening = () => {
     console.log("🟢 Escuchando eventos del contrato...");
 
-    contract.on("createEvent", (from: string, valor: ethers.BigNumber, event) => {
-
-
+    contract.on("EventClosed", (eventCode: string, event) => {
+        console.log("🔔 Evento cerrado:", eventCode);
+        console.log("📦 Raw event:", event);
     });
 
-    contract.on("error", (err: Error) => {
-        console.error("❌ Error en el listener del contrato:", err);
-    });
-}
+};
