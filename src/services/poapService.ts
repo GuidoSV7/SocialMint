@@ -31,10 +31,9 @@ export class POAPService {
       },
       timeout: 20000,
     });
-
   }
 
-  
+
   async createDelivery(data: POAPDeliveryRequest): Promise<any> {
     try {
       const response: AxiosResponse<any> = await this.client.post('/deliveries', data);
@@ -50,8 +49,8 @@ export class POAPService {
 
 
 
-  
-  async  getEventInfo(eventId: string): Promise<any> {
+
+  async getEventInfo(eventId: string): Promise<any> {
     try {
       const response: AxiosResponse<any> = await this.client.get(`/events/id/${eventId}`);
       return response.data;
@@ -64,7 +63,7 @@ export class POAPService {
     }
   }
 
-  
 
-  
+
+
 }
