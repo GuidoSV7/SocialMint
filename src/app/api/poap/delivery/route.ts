@@ -3,6 +3,7 @@ import { POAPService } from '@/services/poapService';
 
 
 export async function POST(request: NextRequest) {
+
   try {
   
      const apiKey = process.env.POAP_API_KEY!;
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
   
     const body = await request.json();
   
-    if (!body.slug || !body.event_ids || !body.secret_codes || !body.addresses) {
+    if (!body.secret_codes || !body.addresses) {
       return NextResponse.json(
         { error: 'Missing required fields: slug, event_ids, secret_codes, addresses' },
         { status: 400 }

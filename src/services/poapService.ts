@@ -2,17 +2,9 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 export interface POAPDeliveryRequest {
-  slug: string;
-  card_title: string;
-  card_text: string;
-  page_title: string;
-  page_text: string;
-  event_ids: string;
+
+  eventId: string;
   secret_codes: string;
-  image: string;
-  page_title_image: string;
-  metadata_title: string;
-  metadata_description: string;
   addresses: Array<{
     address: string;
     events: number[];
@@ -35,9 +27,30 @@ export class POAPService {
   }
 
   
-  async createDelivery(data: POAPDeliveryRequest): Promise<any> {
+  async createDelivery(data: POAPDeliveryRequest ): Promise<any> {
+
+    const eventResponse =  await this.getEventInfo(data.eventId);
+    const dataEvent = eventResponse;
+    console.log(dataEvent);
+    const slug = dataEvent.name.toLowerCase().replace(/ /g, '-');
+
+    const dataDelivery = {
+      ...data,
+      slug: slug,
+      image: dataEvent.image_url,
+      page_title_image: dataEvent.image_url,
+      event_ids: data.eventId,
+      metadata_title: dataEvent.name,
+      metadata_description: dataEvent.description,
+      card_title: "RECLAMA TU POAP!",
+      card_text: "¡Gracias por asistir a nuestro evento! 🎉",
+      page_title: dataEvent.name,
+      page_text: dataEvent.description,
+
+    }  
+
     try {
-      const response: AxiosResponse<any> = await this.client.post('/deliveries', data);
+      const response: AxiosResponse<any> = await this.client.post('/deliveries', dataDelivery);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
