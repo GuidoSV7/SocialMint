@@ -27,32 +27,31 @@ export async function GET(req: NextRequest) {
         const serverUrl = `${protocol}://${host}`;
 
         const metadata: Metadata = {
-            url: "https://sherry.social",
-            icon: "https://avatars.githubusercontent.com/u/117962315",
-            title: "Mensaje con Timestamp",
-            baseUrl: serverUrl,
-            description:
-                "Almacena un mensaje con un timestamp optimizado calculado por nuestro algoritmo",
-            actions: [
+          url: "https://sherry.social",
+          icon: "https://avatars.githubusercontent.com/u/117962315",
+          title: "Mandame tu Id de Twitter para obtener tu POAP",
+          baseUrl: serverUrl,
+          description:
+            "Si tu Post cumple todos  los requisitos, podrás obtener un POAP exclusivo del evento",
+          actions: [
+            {
+              type: "dynamic",
+              label: "Almacenar Mensaje",
+              description:
+                "Almacena tu mensaje con un timestamp personalizado calculado para almacenamiento óptimo",
+              chains: { source: "fuji" },
+              path: `/api/example`,
+              params: [
                 {
-                    type: "dynamic",
-                    label: "Almacenar Mensaje",
-                    description:
-                        "Almacena tu mensaje con un timestamp personalizado calculado para almacenamiento óptimo",
-                    chains: { source: "fuji" },
-                    path: `/api/example`,
-                    params: [
-                        {
-                            name: "mensaje",
-                            label: "¡Tu Mensaje Hermano!",
-                            type: "text",
-                            required: true,
-                            description:
-                                "Ingresa el mensaje que quieres almacenar en la blockchain",
-                        },
-                    ],
+                  name: "iID Twitter",
+                  label: "elonmusk",
+                  type: "text",
+                  required: true,
+                  description: "Ingresa tu ID de Twitter",
                 },
-            ],
+              ],
+            },
+          ],
         };
 
         // Validar metadata usando el SDK
