@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
             functionName: "getEvent",
             args: [eventCode.toLowerCase()],
         });
+
         const { tags } = parseEventData(eventData);
         const isEventValid = await checkHashtagsAndMentions("rflores012", tags);
         // const data = encodeFunctionData({
