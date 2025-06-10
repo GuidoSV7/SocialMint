@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLatestTweetByUsername } from "@/services/twitterService";
+import { extractHashtagsAndMentionsFromTweets, checkHashtagsAndMentions } from "@/services/twitterService";
 
 
 export async function POST(req: NextRequest) {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const hashtags = await getLatestTweetByUsername(handler);
+        const hashtags = await extractHashtagsAndMentionsFromTweets(handler);
         console.log(hashtags);
         return NextResponse.json({ hashtags }, {
             headers: {

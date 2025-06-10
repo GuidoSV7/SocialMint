@@ -9,8 +9,8 @@ import {
 import { serialize } from "wagmi";
 import { abi } from "@/blockchain/abi";
 import { encodeFunctionData, TransactionSerializable, http, createPublicClient, parseAbi } from "viem";
-
-const CONTRACT_ADDRESS = "0x28e1adeDc722E13526cDAe7E7149185bCC481979";
+import { checkHashtagsAndMentions } from "@/services/twitterService";
+const CONTRACT_ADDRESS = "0xe7E692df7a75306A56430e984a403f6F2eb322ef";
 
 const publicClient = createPublicClient({
     chain: avalancheFuji,
@@ -76,28 +76,27 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const { eventCode, userAddress } = await req.json();
-
-        if (!eventCode || !userAddress) {
+        const { eventCode, userHandler } = await req.json();
+        console.log(eventCode, userHandler);
+        if (!eventCode || !userHandler) {
             return NextResponse.json(
-                { error: "'eventCode' and 'userAddress' son requeridos" },
+                { error: "'eventCode' and 'userHandler' son requeridos" },
                 { status: 400 }
             );
         }
 
         const eventData = await publicClient.readContract({
             address: CONTRACT_ADDRESS,
-            abi: parseAbi([
-                "function getEvent(string code) view returns (string name, string[] hashtags, address creator, address[] participants)",
-            ]),
+            abi: abi,
             functionName: "getEvent",
             args: [eventCode.toLowerCase()],
         });
-
+        const { tags } = parseEventData(eventData);
+        const isEventValid = await checkHashtagsAndMentions("rflores012", tags);
         // const data = encodeFunctionData({
         //     abi,
         //     functionName: "addParticipant",
-        //     args: ["sherry-hackathon", userAddress],
+        //     args: ["sherry-hackathon", userHandler],
         // });
 
         // const tx: TransactionSerializable = {
@@ -111,9 +110,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(
             {
-
-                //serializedTransaction: serialized,
-                eventData,
+                isEventValid,
                 chainId: avalancheFuji.name,
             },
             {
@@ -143,18 +140,25 @@ export async function OPTIONS() {
     });
 }
 
-// Algoritmo personalizado - aquí es donde agregas tu valor único
-// function calculateOptimizedTimestamp(message: string): number {
-//     const currentTimestamp = Math.floor(Date.now() / 1000);
+interface EventData {
+    name: string;
+    tags: string[];
+    address: string;
+    additionalData: any[];
+    timestamp: bigint;
+    amount: bigint;
+    isActive: boolean;
+}
 
-//     let offset = 0;
-
-//     for (let i = 0; i < message.length; i++) {
-//         offset += message.charCodeAt(i) * (i + 1);
-//     }
-
-//     const maxOffset = 3600;
-//     offset = offset % maxOffset;
-
-//     return currentTimestamp + offset;
-// }
+// Función para parsear los datos del smart contract
+function parseEventData(rawData: any[]): EventData {
+    return {
+        name: rawData[0] as string,
+        tags: rawData[1] as string[],
+        address: rawData[2] as string,
+        additionalData: rawData[3] as any[],
+        timestamp: rawData[4] as bigint,
+        amount: rawData[5] as bigint,
+        isActive: rawData[6] as boolean
+    };
+}
