@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
               path: `/api/example`,
               params: [
                 {
-                  name: "iID Twitter",
+                  name: "ID Twitter",
                   label: "elonmusk",
                   type: "text",
                   required: true,
