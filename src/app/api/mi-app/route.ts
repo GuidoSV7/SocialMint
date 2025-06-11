@@ -10,7 +10,7 @@ import { serialize } from "wagmi";
 import { abi } from "@/blockchain/abi";
 import { encodeFunctionData, TransactionSerializable, http, createPublicClient, parseAbi } from "viem";
 import { checkHashtagsAndMentions } from "@/services/twitterService";
-const CONTRACT_ADDRESS = "0x91c21B7132b8305E352104ba1e18d302FbAf6162";
+const CONTRACT_ADDRESS = "0xd293e159a133A75098a3D814E681d73B88a7167b";
 
 const publicClient = createPublicClient({
     chain: avalancheFuji,
@@ -28,8 +28,8 @@ export async function GET(req: NextRequest) {
         const metadata: Metadata = {
             "url": "https://sherry.social",
             "icon": "https://avatars.githubusercontent.com/u/117962315",
-            "title": "Mensaje con Timestamp",
-            "baseUrl": "https://tu-servidor.com",
+            "title": "Social Mint",
+            "baseUrl": "http://ec2-3-145-1-198.us-east-2.compute.amazonaws.com",
             "description": "Valida si tu post de X cumple con todos las condiciones necesarias para habilitarte el minteo de tu POAP!",
             "actions": [
                 {
