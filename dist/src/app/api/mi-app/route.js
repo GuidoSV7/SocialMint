@@ -1,31 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { avalancheFuji } from "viem/chains";
-import {
-    createMetadata,
-    Metadata,
-    ValidatedMetadata,
-    ExecutionResponse,
-} from "@sherrylinks/sdk";
+import { createMetadata, } from "@sherrylinks/sdk";
 import { serialize } from "wagmi";
 import { abi } from "@/blockchain/abi";
-import { encodeFunctionData, TransactionSerializable, http, createPublicClient, parseAbi } from "viem";
+import { encodeFunctionData, http, createPublicClient } from "viem";
 import { checkHashtagsAndMentions } from "@/services/twitterService";
 const CONTRACT_ADDRESS = "0xd293e159a133A75098a3D814E681d73B88a7167b";
-
 const publicClient = createPublicClient({
     chain: avalancheFuji,
     transport: http('https://api.avax-test.network/ext/bc/C/rpc'), // RPC pública de Fuji
 });
-export async function GET(req: NextRequest) {
-
+export async function GET(req) {
     //todo: averiguar si se puede obtener la address del usuario desde el frontend de sherry
-
     try {
         const host = req.headers.get("host") || "localhost:3000";
         const protocol = req.headers.get("x-forwarded-proto") || "http";
         const serverUrl = `${protocol}://${host}`;
-
-        const metadata: Metadata = {
+        const metadata = {
             "url": "https://sherry.social",
             "icon": "https://avatars.githubusercontent.com/u/117962315",
             "title": "Social Mint",
@@ -59,10 +50,8 @@ export async function GET(req: NextRequest) {
                 }
             ]
         };
-
         // Validar metadata usando el SDK
-        const validated: ValidatedMetadata = createMetadata(metadata);
-
+        const validated = createMetadata(metadata);
         // Retornar con headers CORS para acceso cross-origin
         return NextResponse.json(validated, {
             headers: {
@@ -70,50 +59,35 @@ export async function GET(req: NextRequest) {
                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             },
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error creando metadata:", error);
-        return NextResponse.json(
-            { error: "Error al crear metadata" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Error al crear metadata" }, { status: 500 });
     }
 }
-
-export async function POST(req: NextRequest) {
+export async function POST(req) {
     try {
         const { eventCode, userHandler } = await req.json();
-
         if (!eventCode || !userHandler) {
-            return NextResponse.json(
-                { error: "'eventCode' and 'userHandler' son requeridos" },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: "'eventCode' and 'userHandler' son requeridos" }, { status: 400 });
         }
-
         const eventData = await publicClient.readContract({
             address: CONTRACT_ADDRESS,
             abi: abi,
             functionName: "getEvent",
             args: [eventCode.toLowerCase()],
         });
-
         const { tags } = parseEventData([eventData]);
-
         const isEventValid = await checkHashtagsAndMentions("rflores012", tags);
         if (!isEventValid) {
-            return NextResponse.json(
-                { error: "No se encontró publicación con los tags del evento" },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: "No se encontró publicación con los tags del evento" }, { status: 400 });
         }
-
         const data = encodeFunctionData({
             abi,
             functionName: "addParticipant",
             args: [eventCode],
         });
-
-        const tx: TransactionSerializable = {
+        const tx = {
             to: CONTRACT_ADDRESS,
             data: data,
             chainId: avalancheFuji.id,
@@ -121,9 +95,8 @@ export async function POST(req: NextRequest) {
         };
         // Serializar transacción
         const serialized = serialize(tx);
-
         // Crear respuesta
-        const resp: ExecutionResponse = {
+        const resp = {
             serializedTransaction: serialized,
             chainId: avalancheFuji.name,
         };
@@ -135,43 +108,31 @@ export async function POST(req: NextRequest) {
                 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
             },
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error en petición POST:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
-
 export async function OPTIONS() {
     return new NextResponse(null, {
         status: 204,
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers':
-                'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version',
         },
     });
 }
-
-interface EventData {
-    name: string;
-    tags: string[];
-    address: string;
-    additionalData: any[];
-    timestamp: bigint;
-    amount: bigint;
-    isActive: boolean;
-}
-
 // Función para parsear los datos del smart contract
-function parseEventData(rawData: any[]): EventData {
+function parseEventData(rawData) {
     return {
-        name: rawData[0] as string,
-        tags: rawData[1] as string[],
-        address: rawData[2] as string,
-        additionalData: rawData[3] as any[],
-        timestamp: rawData[4] as bigint,
-        amount: rawData[5] as bigint,
-        isActive: rawData[6] as boolean
+        name: rawData[0],
+        tags: rawData[1],
+        address: rawData[2],
+        additionalData: rawData[3],
+        timestamp: rawData[4],
+        amount: rawData[5],
+        isActive: rawData[6]
     };
 }

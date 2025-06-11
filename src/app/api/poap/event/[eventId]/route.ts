@@ -3,16 +3,16 @@ import { POAPService } from '@/services/poapService';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { eventId: string } }
+  context: { params: { eventId: string } }
 ) {
   try {
-    
+
     const apiKey = process.env.POAP_API_KEY!;
 
 
- 
-    const { eventId } = params;
-    
+
+    const { eventId } = context.params;
+
     if (!eventId) {
       return NextResponse.json(
         { error: 'Event ID is required' },
@@ -31,27 +31,27 @@ export async function GET(
 
     const poapService = new POAPService(apiKey);
     const eventInfo = await poapService.getEventInfo(eventId);
-    
- 
+
+
     return NextResponse.json(eventInfo, { status: 200 });
 
   } catch (error: any) {
     console.error('Error in POAP event info route:', error);
 
-  
+
     if (error.message?.includes('POAP API Error')) {
       return NextResponse.json(
-        { 
+        {
           error: 'POAP API Error',
-          details: error.message 
+          details: error.message
         },
         { status: 400 }
       );
     }
 
-  
+
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to get event info',
         details: error.message || 'Unknown error'
       },

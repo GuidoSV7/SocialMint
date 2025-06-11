@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "build:server": "tsc src/app/server/index.ts --outDir dist",
-    "start:prod": "NODE_ENV=production node dist/app/server/index.js",
+    "start:prod": "NODE_ENV=production node dist/src/app/server/index.js",
     "deploy": "npm run build && npm run build:server && npm run start:prod"
   },
   "dependencies": {
@@ -19,6 +19,8 @@
     "@the-convocation/twitter-scraper": "^0.17.1",
     "axios": "^1.9.0",
     "cheerio": "^1.0.0",
+    "dotenv": "^16.5.0",
+    "ethers": "^6.14.3",
     "express": "^5.1.0",
     "next": "15.3.3",
     "playwright": "^1.52.0",

@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -28,7 +27,7 @@ interface PoapState {
   setMessage: (message: string, isError?: boolean) => void;
   setClaimStatus: (status: string) => void;
   clearMessage: () => void;
-  
+
   // POAP operations
   getWalletAssignedLink: (wallet: string) => MintLink | null;
   checkIfWalletAlreadyClaimed: (wallet: string) => boolean;
@@ -74,17 +73,17 @@ export const usePoapStore = create<PoapState>()(
       claimStatus: '',
 
       // Computed values
-      availableCount: () => get().mintLinks.filter(link => !link.claimed).length,
+      availableCount: () => get().mintLinks.filter((link: { claimed: any; }) => !link.claimed).length,
       totalCount: () => get().mintLinks.length,
 
       // Basic actions
       setLoading: (loading: boolean) => set({ isLoading: loading }),
-      
-      setMessage: (message: string, isError: boolean = false) => 
+
+      setMessage: (message: string, isError: boolean = false) =>
         set({ message, isError }),
-      
+
       setClaimStatus: (status: string) => set({ claimStatus: status }),
-      
+
       clearMessage: () => set({ message: '', isError: false, claimStatus: '' }),
 
       // POAP operations
@@ -104,19 +103,19 @@ export const usePoapStore = create<PoapState>()(
       },
 
       claimPOAP: async (wallet: string) => {
-        const { 
-          checkIfWalletAlreadyClaimed, 
-          getWalletAssignedLink, 
+        const {
+          checkIfWalletAlreadyClaimed,
+          getWalletAssignedLink,
           mintLinks,
-          setClaimStatus 
+          setClaimStatus
         } = get();
-        
+
         set({ isLoading: true });
         setClaimStatus('Verificando disponibilidad...');
-        
+
         // Simular delay de red/procesamiento
         await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-        
+
         // Verificar si la wallet ya reclamó (doble verificación por concurrencia)
         if (checkIfWalletAlreadyClaimed(wallet)) {
           const assignedLink = getWalletAssignedLink(wallet);
@@ -127,39 +126,39 @@ export const usePoapStore = create<PoapState>()(
           set({ isLoading: false, claimStatus: '' });
           return { success: false, error: 'Esta wallet ya reclamó un POAP' };
         }
-        
+
         // Buscar primer mint link disponible
-        const availableLinks = mintLinks.filter(link => !link.claimed);
-        
+        const availableLinks = mintLinks.filter((link: { claimed: any; }) => !link.claimed);
+
         if (availableLinks.length === 0) {
           set({ isLoading: false, claimStatus: '' });
           return { success: false, error: 'No hay más POAPs disponibles' };
         }
-        
+
         // Tomar el primero disponible (FIFO)
         const selectedLink = availableLinks[0];
-        
+
         setClaimStatus('Asignando POAP...');
-        
+
         // Simular otro pequeño delay para el procesamiento
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         // Actualizar estado - marcar como reclamado
         set(state => ({
-          mintLinks: state.mintLinks.map(link => 
-            link.id === selectedLink.id 
-              ? { 
-                  ...link, 
-                  claimed: true, 
-                  claimedBy: wallet,
-                  claimedAt: new Date().toISOString()
-                }
+          mintLinks: state.mintLinks.map(link =>
+            link.id === selectedLink.id
+              ? {
+                ...link,
+                claimed: true,
+                claimedBy: wallet,
+                claimedAt: new Date().toISOString()
+              }
               : link
           ),
           isLoading: false,
           claimStatus: ''
         }));
-        
+
         return { success: true, link: selectedLink, isExisting: false };
       },
 
@@ -174,8 +173,8 @@ export const usePoapStore = create<PoapState>()(
     }),
     {
       name: 'poap-storage',
-      partialize: (state) => ({ 
-        mintLinks: state.mintLinks 
+      partialize: (state) => ({
+        mintLinks: state.mintLinks
       }),
     }
   )
