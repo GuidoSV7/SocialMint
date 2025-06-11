@@ -10,7 +10,7 @@ import { serialize } from "wagmi";
 import { abi } from "@/blockchain/abi";
 import { encodeFunctionData, TransactionSerializable, http, createPublicClient, parseAbi } from "viem";
 import { checkHashtagsAndMentions } from "@/services/twitterService";
-const CONTRACT_ADDRESS = "0xe7E692df7a75306A56430e984a403f6F2eb322ef";
+const CONTRACT_ADDRESS = "0xd293e159a133A75098a3D814E681d73B88a7167b";
 
 const publicClient = createPublicClient({
     chain: avalancheFuji,
@@ -29,25 +29,30 @@ export async function GET(req: NextRequest) {
         const metadata: Metadata = {
           url: "https://sherry.social",
           icon: "https://avatars.githubusercontent.com/u/117962315",
-          title: "Mandame tu Id de Twitter para obtener tu POAP",
+          title: "Social Mint",
           baseUrl: serverUrl,
-          description:
-            "Si tu Post cumple todos  los requisitos, podrás obtener un POAP exclusivo del evento",
+          description: "Valida si tu post de X cumple con todos las condiciones necesarias para habilitarte el minteo de tu POAP!",
           actions: [
             {
               type: "dynamic",
-              label: "Almacenar Mensaje",
-              description:
-                "Almacena tu mensaje con un timestamp personalizado calculado para almacenamiento óptimo",
+              label: "Valida tu post de X",
+              description: "Validar",
               chains: { source: "fuji" },
-              path: `/api/example`,
+              path: `/api/mi-app`,
               params: [
                 {
-                  name: "ID Twitter",
+                  name: "eventCode",
+                  label: "Código del evento",
+                  type: "text",
+                  required: true,
+                  description: "Ingresa el código del evento",
+                },
+                {
+                  name: "userHandler",
                   label: "elonmusk",
                   type: "text",
                   required: true,
-                  description: "Ingresa tu ID de Twitter",
+                  description: "Ingresa tu usuario de Twitter (X)",
                 },
               ],
             },
@@ -76,7 +81,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const { eventCode, userHandler } = await req.json();
-        console.log(eventCode, userHandler);
+        
+
         if (!eventCode || !userHandler) {
             return NextResponse.json(
                 { error: "'eventCode' and 'userHandler' son requeridos" },
@@ -92,36 +98,43 @@ export async function POST(req: NextRequest) {
         });
 
         const { tags } = parseEventData(eventData);
+
         const isEventValid = await checkHashtagsAndMentions("rflores012", tags);
-        // const data = encodeFunctionData({
-        //     abi,
-        //     functionName: "addParticipant",
-        //     args: ["sherry-hackathon", userHandler],
-        // });
+        if (!isEventValid) {
+            return NextResponse.json(
+                { error: "No se encontró publicación con los tags del evento" },
+                { status: 400 }
+            );
+        }
 
-        // const tx: TransactionSerializable = {
-        //     to: CONTRACT_ADDRESS,
-        //     data,
-        //     chainId: avalancheFuji.id,
-        //     type: "legacy",
-        // };
+        const data = encodeFunctionData({
+            abi,
+            functionName: "addParticipant",
+            args: [eventCode],
+        });
 
-        // const serialized = serialize(tx);
+        const tx: TransactionSerializable = {
+            to: CONTRACT_ADDRESS,
+            data: data,
+            chainId: avalancheFuji.id,
+            type: 'legacy',
+        };
+        // Serializar transacción
+        const serialized = serialize(tx);
 
-        return NextResponse.json(
-            {
-                isEventValid,
-                chainId: avalancheFuji.name,
+        // Crear respuesta
+        const resp: ExecutionResponse = {
+            serializedTransaction: serialized,
+            chainId: avalancheFuji.name,
+        };
+        return NextResponse.json(resp, {
+            status: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
             },
-            {
-                status: 200,
-                headers: {
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-                },
-            }
-        );
+        });
     } catch (error) {
         console.error("Error en petición POST:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
