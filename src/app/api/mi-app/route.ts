@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
             "url": "https://sherry.social",
             "icon": "https://avatars.githubusercontent.com/u/117962315",
             "title": "Social Mint",
-            "baseUrl": "http://ec2-3-145-1-198.us-east-2.compute.amazonaws.com",
+            "baseUrl": "https://www.tupasantia.lat",
             "description": "Valida si tu post de X cumple con todos las condiciones necesarias para habilitarte el minteo de tu POAP!",
             "actions": [
                 {
@@ -98,8 +98,14 @@ export async function POST(req: NextRequest) {
         });
 
         const { tags } = parseEventData([eventData]);
+        if (tags.length === 0) {
+            return NextResponse.json(
+                { error: "No se encontro el evento" },
+                { status: 400 }
+            );
+        }
 
-        const isEventValid = await checkHashtagsAndMentions("rflores012", tags);
+        const isEventValid = await checkHashtagsAndMentions(userHandler, tags);
         if (!isEventValid) {
             return NextResponse.json(
                 { error: "No se encontró publicación con los tags del evento" },
