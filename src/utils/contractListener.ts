@@ -6,11 +6,11 @@ dotenv.config();
 const contractABI = [
     "event EventClosed(string indexed eventCode)" // <- Evento real
 ];
-
-const provider = new ethers.WebSocketProvider(process.env.WEBSOCKET_URL as string);
+console.log(process.env.WEBSOCKET_URL);
+const provider = new ethers.WebSocketProvider("wss://api.avax-test.network/ext/bc/C/ws");
 
 const contract = new ethers.Contract(
-    process.env.CONTRACT_ADDRESS as string,
+    "0x91c21B7132b8305E352104ba1e18d302FbAf6162",
     contractABI,
     provider
 );
