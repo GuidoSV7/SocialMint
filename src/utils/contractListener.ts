@@ -18,9 +18,9 @@ const contract = new ethers.Contract(
 export const startListening = () => {
     console.log("🟢 Escuchando eventos del contrato...");
 
-    contract.on("EventClosed", (eventCode: string, event: any) => {
-        console.log("🔔 Evento cerrado:", eventCode);
-        console.log("📦 Raw event:", event);
-    });
+    // contract.on("EventClosed", (eventCode: string, event: any) => {
+    //     console.log("🔔 Evento cerrado:", eventCode);
+    //     console.log("📦 Raw event:", event);
+    // });
 
 };
