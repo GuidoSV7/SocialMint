@@ -10,7 +10,7 @@ import { serialize } from "wagmi";
 import { abi } from "@/blockchain/abi";
 import { encodeFunctionData, TransactionSerializable, http, createPublicClient, parseAbi } from "viem";
 import { checkHashtagsAndMentions } from "@/services/twitterService";
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS as string;
+const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS as `0x${string}`;
 
 const publicClient = createPublicClient({
     chain: avalancheFuji,
