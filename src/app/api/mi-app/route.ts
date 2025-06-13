@@ -21,9 +21,9 @@ export async function GET(req: NextRequest) {
     //todo: averiguar si se puede obtener la address del usuario desde el frontend de sherry
 
     try {
-        const host = req.headers.get("host") || "localhost:3000";
-        const protocol = req.headers.get("x-forwarded-proto") || "http";
-        const serverUrl = `${protocol}://${host}`;
+        // const host = req.headers.get("host") || "localhost:3000";
+        // const protocol = req.headers.get("x-forwarded-proto") || "http";
+        // const serverUrl = `${protocol}://${host}`;
 
         const metadata: Metadata = {
             "url": "https://sherry.social",
