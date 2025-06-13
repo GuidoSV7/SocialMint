@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
             "url": "https://sherry.social",
             "icon": "https://avatars.githubusercontent.com/u/117962315",
             "title": "Social Mint",
-            "baseUrl": serverUrl,
+            "baseUrl": "https://www.tupasantia.lat",
             "description": "Valida si tu post de X cumple con todos las condiciones necesarias para habilitarte el minteo de tu POAP!",
             "actions": [
                 {
