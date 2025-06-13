@@ -80,9 +80,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+    
     try {
         const { eventCode, userHandler } = await req.json();
-
+        console.log(eventCode, userHandler);
         if (!eventCode || !userHandler) {
             return NextResponse.json(
                 { error: "'eventCode' and 'userHandler' son requeridos" },
@@ -147,17 +148,17 @@ export async function POST(req: NextRequest) {
     }
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
     return new NextResponse(null, {
-        status: 204,
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers':
-                'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version',
-        },
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers':
+          'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version',
+      },
     });
-}
+  }
 
 interface EventData {
     name: string;
