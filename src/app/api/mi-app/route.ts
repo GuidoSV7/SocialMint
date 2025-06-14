@@ -19,7 +19,7 @@ const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS as `0x${string}`;
 
 const publicClient = createPublicClient({
   chain: avalancheFuji,
-  transport: http("https://api.avax-test.network/ext/bc/C/rpc"), // RPC pública de Fuji
+  transport: http("https://rpc.ankr.com/avalanche_fuji"),
 });
 export async function GET(req: NextRequest) {
   //todo: averiguar si se puede obtener la address del usuario desde el frontend de sherry
