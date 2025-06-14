@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const eventCode = searchParams.get("mensaje");
     const userHandler = searchParams.get("mensaje");
-
+    console.log(eventCode, userHandler);
     if (!eventCode || !userHandler) {
         return NextResponse.json(
           { error: 'El codigo del evento y el usuario de Twitter son requeridos' },
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       functionName: "getEvent",
       args: [eventCode.toLowerCase()],
     });
-
+    console.log(eventData);
     const { tags } = parseEventData([eventData]);
     if (tags.length === 0) {
         return NextResponse.json(
@@ -127,6 +127,7 @@ export async function POST(req: NextRequest) {
     }
 
     const isEventValid = await checkHashtagsAndMentions(userHandler, tags);
+    console.log(isEventValid);
     if (!isEventValid) {
         return NextResponse.json(
             { error: 'No se encontró publicación con los tags del evento' },
