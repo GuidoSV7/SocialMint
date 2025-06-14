@@ -87,8 +87,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const eventCode = searchParams.get("mensaje");
-    const userHandler = searchParams.get("mensaje");
+    const eventCode = searchParams.get("eventCode");
+    const userHandler = searchParams.get("userHandler");
     console.log(eventCode, userHandler);
     if (!eventCode || !userHandler) {
         return NextResponse.json(
