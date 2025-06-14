@@ -18,6 +18,9 @@ export default function AdminPage() {
   const { disconnect } = useDisconnect();
 
   const handleTabChange = (tab: string) => {
+    console.log(process.env.INFURA_API_KEY);
+    console.log(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS);
+    console.log(process.env.CONTRACT_ADDRESS);
     setActiveTab(tab);
   };
   

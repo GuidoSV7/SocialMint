@@ -280,36 +280,107 @@
   color: #2c3e50;
 }
 
+.eventsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
 .eventsList {
   display: grid;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
 }
 
 .eventCard {
-  background: white;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  border-left: 5px solid #3498db;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.eventCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .eventCard h3 {
-  color: #2c3e50;
-  margin-bottom: 15px;
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.25rem;
 }
 
 .eventCard p {
-  margin: 8px 0;
-  color: #7f8c8d;
+  margin: 0.5rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.eventCard strong {
+  color: #444;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.paginationButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.loadingMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.errorMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #dc3545;
+  font-size: 1.1rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #dc3545;
 }
 
 .noEventsMessage {
   text-align: center;
-  padding: 60px 20px;
-  color: #7f8c8d;
-  font-style: italic;
-  background: #f8f9fa;
-  border-radius: 15px;
+  padding: 2rem;
+  color: #666;
+  font-size: 1.1rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
 }
 
 .eventsStatistics {

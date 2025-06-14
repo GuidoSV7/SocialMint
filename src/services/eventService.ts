@@ -30,6 +30,23 @@ export interface CreateEventParams {
   poapId: string;
 }
 
+export interface PaginatedEvent {
+  code: string;
+  name: string;
+  creator: `0x${string}`;
+  startTime: bigint;
+  duration: bigint;
+  closed: boolean;
+  poapId: string;
+  hashtags: readonly string[];
+  participantCount: bigint;
+}
+
+export interface PaginatedEventsResponse {
+  events: PaginatedEvent[];
+  totalEvents: bigint;
+}
+
 export class EventService {
   private static blockchainClient = BlockchainClient.getInstance();
 
@@ -134,6 +151,9 @@ export class EventService {
     params: CreateEventParams,
     walletClient: WalletClient
   ): Promise<`0x${string}`> {
+    console.log('Creating event', params);
+    console.log('Wallet client', walletClient);
+    console.log('Blockchain client', this.blockchainClient.getContractAddress());
     try {
       if (!walletClient.account) {
         throw new EventError('No account connected', 'NO_ACCOUNT_ERROR');
@@ -166,9 +186,71 @@ export class EventService {
 
       return hash;
     } catch (error) {
+      console.log('Error creating event', error);
       throw new EventError(
         'Failed to create event transaction',
         'CREATE_EVENT_ERROR'
+      );
+    }
+  }
+
+  /**
+   * Get paginated events from the blockchain
+   * @param page The page number (1-based)
+   * @param pageSize The number of events per page
+   * @returns The paginated events and total count
+   * @throws EventError if there is an error fetching the events
+   */
+  static async getPaginatedEvents(page: number, pageSize: number): Promise<PaginatedEventsResponse> {
+    try {
+      const start = (page - 1) * pageSize;
+      
+      const [totalEvents, paginatedData] = await Promise.all([
+        this.blockchainClient.getClient().readContract({
+          address: this.blockchainClient.getContractAddress(),
+          abi: this.blockchainClient.getAbi(),
+          functionName: "totalEvents",
+        }),
+        this.blockchainClient.getClient().readContract({
+          address: this.blockchainClient.getContractAddress(),
+          abi: this.blockchainClient.getAbi(),
+          functionName: "getEventsPaginated",
+          args: [BigInt(start), BigInt(pageSize)],
+        })
+      ]);
+
+      const [
+        codes,
+        names,
+        creators,
+        startTimes,
+        durations,
+        closedStatuses,
+        poapIds,
+        hashtags,
+        participantCounts
+      ] = paginatedData;
+
+      const events: PaginatedEvent[] = codes.map((code, index) => ({
+        code,
+        name: names[index],
+        creator: creators[index],
+        startTime: startTimes[index],
+        duration: durations[index],
+        closed: closedStatuses[index],
+        poapId: poapIds[index],
+        hashtags: hashtags[index],
+        participantCount: participantCounts[index]
+      }));
+
+      return {
+        events,
+        totalEvents
+      };
+    } catch (error) {
+      throw new EventError(
+        'Failed to fetch paginated events',
+        'FETCH_EVENTS_ERROR'
       );
     }
   }

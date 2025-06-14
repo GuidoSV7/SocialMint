@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useWalletClient } from 'wagmi';
+import { EventService } from '@/services/eventService';
 import styles from '../styles.module.css';
 
 interface Hashtag {
@@ -9,12 +10,21 @@ interface Hashtag {
   text: string;
 }
 
+interface Mention {
+  id: string;
+  text: string;
+}
+
 export default function CreateEventTab() {
   const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
   const [eventCode, setEventCode] = useState('');
   const [eventName, setEventName] = useState('');
+  const [poapId, setPoapId] = useState('');
   const [hashtags, setHashtags] = useState<Hashtag[]>([]);
   const [hashtagInput, setHashtagInput] = useState('');
+  const [mentions, setMentions] = useState<Mention[]>([]);
+  const [mentionInput, setMentionInput] = useState('');
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [error, setError] = useState('');
@@ -31,6 +41,16 @@ export default function CreateEventTab() {
     setHashtags(hashtags.filter(h => h.id !== id));
   };
 
+  const addMention = (mention: string) => {
+    if (mention && !mentions.some(m => m.text === mention)) {
+      setMentions([...mentions, { id: Math.random().toString(), text: mention }]);
+    }
+  };
+
+  const removeMention = (id: string) => {
+    setMentions(mentions.filter(m => m.id !== id));
+  };
+
   const handleHashtagKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -38,6 +58,17 @@ export default function CreateEventTab() {
       if (tag) {
         addHashtag(tag);
         setHashtagInput('');
+      }
+    }
+  };
+
+  const handleMentionKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const mention = mentionInput.trim().replace('@', '');
+      if (mention) {
+        addMention(mention);
+        setMentionInput('');
       }
     }
   };
@@ -52,12 +83,12 @@ export default function CreateEventTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!address) {
+    if (!address || !walletClient) {
       setError('Por favor, conecta tu wallet primero');
       return;
     }
 
-    if (!eventCode || !eventName) {
+    if (!eventCode || !eventName || !poapId) {
       setError('Por favor, completa todos los campos obligatorios');
       return;
     }
@@ -72,15 +103,28 @@ export default function CreateEventTab() {
       setIsLoading(true);
       setError('');
       
-      // TODO: Implement actual event creation logic here
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated delay
+      // Combine hashtags and mentions into a single array
+      const allTags = [
+        ...hashtags.map(h => `#${h.text}`),
+        ...mentions.map(m => `@${m.text}`)
+      ];
       
-      setSuccess(`Evento "${eventName}" creado exitosamente con código: ${eventCode}`);
+      const hash = await EventService.createEvent({
+        code: eventCode,
+        name: eventName,
+        hashtags: allTags,
+        durationSeconds: BigInt(duration),
+        poapId: poapId
+      }, walletClient);
+      
+      setSuccess(`Evento "${eventName}" creado exitosamente con código: ${eventCode}. Hash: ${hash}`);
       
       // Reset form
       setEventCode('');
       setEventName('');
+      setPoapId('');
       setHashtags([]);
+      setMentions([]);
       setHours(0);
       setMinutes(0);
       
@@ -121,6 +165,18 @@ export default function CreateEventTab() {
       </div>
 
       <div className={styles.formSection}>
+        <label htmlFor="poapId">ID del POAP *</label>
+        <input
+          type="text"
+          id="poapId"
+          value={poapId}
+          onChange={(e) => setPoapId(e.target.value)}
+          required
+          placeholder="Ingresa el ID del POAP"
+        />
+      </div>
+
+      <div className={styles.formSection}>
         <label>Hashtags del Evento</label>
         <div className={styles.hashtagsContainer}>
           {hashtags.map(hashtag => (
@@ -153,6 +209,42 @@ export default function CreateEventTab() {
         </div>
         <small className={styles.helperText}>
           Presiona Enter o haz clic fuera del campo para agregar hashtags
+        </small>
+      </div>
+
+      <div className={styles.formSection}>
+        <label>Menciones del Evento</label>
+        <div className={styles.hashtagsContainer}>
+          {mentions.map(mention => (
+            <div key={mention.id} className={styles.hashtagTag}>
+              @{mention.text}
+              <button
+                type="button"
+                className={styles.hashtagRemove}
+                onClick={() => removeMention(mention.id)}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          <input
+            type="text"
+            className={styles.hashtagInput}
+            value={mentionInput}
+            onChange={(e) => setMentionInput(e.target.value)}
+            onKeyPress={handleMentionKeyPress}
+            onBlur={() => {
+              const mention = mentionInput.trim().replace('@', '');
+              if (mention) {
+                addMention(mention);
+                setMentionInput('');
+              }
+            }}
+            placeholder="Escribe una mención (@usuario) y presiona Enter"
+          />
+        </div>
+        <small className={styles.helperText}>
+          Presiona Enter o haz clic fuera del campo para agregar menciones
         </small>
       </div>
 
