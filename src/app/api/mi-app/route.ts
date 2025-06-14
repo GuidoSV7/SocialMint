@@ -19,7 +19,7 @@ const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS as `0x${string}`;
 
 const publicClient = createPublicClient({
   chain: avalancheFuji,
-  transport: http("https://rpc.ankr.com/avalanche_fuji-c/4e65ce064b01636e8a4cecb409227e4efed5fb000f4438120d59e59a15140bab"),
+  transport: http("https://api.avax-test.network/ext/bc/C/rpc"), // RPC pública de Fuji
 });
 export async function GET(req: NextRequest) {
   //todo: averiguar si se puede obtener la address del usuario desde el frontend de sherry
@@ -110,9 +110,12 @@ export async function POST(req: NextRequest) {
       functionName: "getEvent",
       args: [eventCode.toLowerCase()],
     });
-    console.log(eventData);
-    const { tags } = parseEventData([eventData]);
-    if (tags.length === 0) {
+    console.log("Raw event data:", eventData);
+    const parsedData = parseEventData(eventData);
+    console.log("Parsed data:", parsedData);
+    const { tags } = parsedData;
+    console.log("Tags:", tags);
+    if (!tags || tags.length === 0) {
         return NextResponse.json(
             { error: 'No se encontró el codigo del evento' },
             {
@@ -192,24 +195,29 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 interface EventData {
+  poadId: string;
   name: string;
   tags: string[];
   address: string;
-  additionalData: any[];
-  timestamp: bigint;
-  amount: bigint;
-  isActive: boolean;
+  participantsAddress: any[];
+  startTime: bigint;
+  duration: bigint;
+  closed: boolean;
+  registeredQuantity: bigint;
 }
 
 // Función para parsear los datos del smart contract
-function parseEventData(rawData: any[]): EventData {
+function parseEventData(rawData: any): EventData {
+  console.log("Parsing raw data:", rawData);
   return {
-    name: rawData[0] as string,
-    tags: rawData[1] as string[],
-    address: rawData[2] as string,
-    additionalData: rawData[3] as any[],
-    timestamp: rawData[4] as bigint,
-    amount: rawData[5] as bigint,
-    isActive: rawData[6] as boolean,
+    poadId: rawData[0] as string,
+    name: rawData[1] as string,
+    tags: Array.isArray(rawData[2]) ? rawData[2] : [],
+    address: rawData[3] as string,
+    participantsAddress: Array.isArray(rawData[4]) ? rawData[4] : [],
+    startTime: rawData[5] as bigint,
+    duration: rawData[6] as bigint,
+    closed: rawData[7] as boolean,
+    registeredQuantity: rawData[8] as bigint,
   };
 }

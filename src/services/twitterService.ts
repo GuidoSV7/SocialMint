@@ -48,8 +48,9 @@ async function extractHashtagsAndMentionsFromTweets(data: any): Promise<string[]
      * @param eventTags An object with the tags of the event.
      */
 export async function checkHashtagsAndMentions(handler: string, eventTags: string[]): Promise<boolean> {
+    console.log("Checking hashtags and mentions for:", handler);
     try {
-        const response = await apiClient.get(`/twitter/user/${handler}`);
+        const response = await apiClient.get(`/user-tweets?username=${handler}`);
         if (response.data) {
             // Get all tweets with their hashtags
             const entriesTags = await extractHashtagsAndMentionsFromTweets(response);
@@ -58,7 +59,7 @@ export async function checkHashtagsAndMentions(handler: string, eventTags: strin
             const normalizedEventTags = eventTags.map(tag =>
                 tag.toLowerCase()
             );
-
+            console.log("Entries tags:", entriesTags, "Event tags:", normalizedEventTags);
             // Check if at least one tweet contains all required tags
             return entriesTags.some(tweetTags => {
                 // Normalize tweet tags (remove # and convert to lowercase)
