@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración POAP - Gestión de Eventos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 5px;
+            gap: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .wallet-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+        }
+
+        .wallet-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .wallet-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e74c3c;
+        }
+
+        .status-dot.connected {
+            background: #27ae60;
+        }
+
+        .connect-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .connect-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-section input, .form-section select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-section input:focus, .form-section select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .hashtags-container {
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            cursor: text;
+        }
+
+        .hashtags-container:focus-within {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .hashtag-tag {
+            background: #3498db;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hashtag-remove {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .hashtag-input {
+            border: none;
+            outline: none;
+            padding: 8px;
+            font-size: 16px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .duration-calculator {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .duration-input {
+            text-align: center;
+        }
+
+        .duration-input label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .duration-result {
+            background: #f1f2f6;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #27ae60;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-panel {
+            background: #ecf0f1;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .contract-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        .events-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .no-events-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+            font-style: italic;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .events-statistics {
+            display: grid;
+            gap: 25px;
+        }
+
+        .event-stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .event-stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .event-stat-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .event-stat-code {
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .event-stat-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-detail-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .stat-detail-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hashtags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .hashtag-display {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .participants-count {
+            font-size: 2em;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+        }
+
+        .participants-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .participant-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            border-left: 3px solid #3498db;
+            font-size: 0.9em;
+        }
+
+        .twitter-handle {
+            color: #1da1f2;
+            font-weight: 600;
+        }
+
+        .wallet-address {
+            font-family: monospace;
+            color: #7f8c8d;
+            font-size: 0.8em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .wallet-info {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .duration-calculator {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .event-stat-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .event-stat-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Administración POAP</h1>
+            <p>Gestión completa de eventos con integración Web3</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="create">📝 Crear Evento</button>
+            <button class="tab" data-tab="events">📊 Mis Eventos</button>
+            <button class="tab" data-tab="stats">📈 Estadísticas</button>
+            <button class="tab" data-tab="register">🧾 Registrarse a Evento</button>
+        </div>
+
+        <div class="wallet-section">
+            <div class="wallet-info">
+                <div class="wallet-status">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="walletStatus">Desconectado</span>
+                </div>
+                <button class="connect-btn" id="connectBtn">Conectar MetaMask</button>
+            </div>
+            <div class="contract-info" id="contractInfo" style="display: none;">
+                <div><strong>Red:</strong> <span id="networkName">-</span></div>
+                <div><strong>Cuenta:</strong> <span id="accountAddress">-</span></div>
+                <div><strong>Balance:</strong> <span id="accountBalance">-</span> ETH</div>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+        <div class="loading" id="loadingPanel">
+            <div class="spinner"></div>
+            <p>Procesando transacción...</p>
+        </div>
+
+        <!-- Tab: Crear Evento -->
+        <div class="tab-content active" id="createTab">
+            <form id="poapForm">
+                <div class="form-section">
+                    <label for="eventCode">Código del Evento *</label>
+                    <input type="text" id="eventCode" name="code" required 
+                           placeholder="Ingresa el código único del evento">
+                </div>
+
+                <div class="form-section">
+                    <label for="eventName">Nombre del Evento *</label>
+                    <input type="text" id="eventName" name="name" required 
+                           placeholder="Nombre descriptivo del evento">
+                </div>
+
+                <div class="form-section">
+                    <label>Hashtags del Evento</label>
+                    <div class="hashtags-container" id="hashtagsContainer">
+                        <input type="text" class="hashtag-input" id="hashtagInput" 
+                               placeholder="Escribe un hashtag y presiona Enter">
+                    </div>
+                    <small style="color: #7f8c8d; margin-top: 5px; display: block;">
+                        Presiona Enter o haz clic fuera del campo para agregar hashtags
+                    </small>
+                </div>
+
+                <div class="form-section">
+                    <label>Duración del Evento</label>
+                    <div class="duration-calculator">
+                        <div class="duration-input">
+                            <label>Horas</label>
+                            <input type="number" id="hours" min="0" max="999" value="0" placeholder="0">
+                        </div>
+                        <div class="duration-input">
+                            <label>Minutos</label>
+                            <input type="number" id="minutes" min="0" max="59" value="0" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="duration-result" id="durationResult">
+                        Total: 0 segundos
+                    </div>
+                </div>
+
+                <div class="info-panel">
+                    <strong>📋 Información:</strong><br>
+                    • Todos los campos marcados con * son obligatorios<br>
+                    • Los hashtags se agregan automáticamente al presionar Enter<br>
+                    • La duración se calcula automáticamente en segundos<br>
+                    • Asegúrate de tener suficiente ETH para el gas de la transacción
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                    Crear Evento POAP
+                </button>
+            </form>
+        </div>
+
+        <!-- Tab: Mis Eventos -->
+        <div class="tab-content" id="eventsTab">
+            <div class="events-list" id="eventsList">
+                <div class="no-events-message">
+                    Conecta tu wallet y crea tu primer evento para verlo aquí.
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Registro de Participantes -->
+        <div class="tab-content" id="registerTab">
+            <form id="participantForm">
+                <div class="form-section">
+                    <label for="eventSelect">Selecciona un evento *</label>
+                    <select id="eventSelect" required>
+                        <option value="">-- Selecciona --</option>
+                    </select>
+                </div>
+                <div class="form-section">
+                    <label for="twitterInput">Usuario de Twitter *</label>
+                    <input type="text" id="twitterInput" required placeholder="@usuario">
+                </div>
+                <div class="form-section">
+                    <label for="walletInput">Dirección de Wallet *</label>
+                    <input type="text" id="walletInput" required placeholder="0x...">
+                </div>
+                <button type="submit" class="submit-btn">Registrarme</button>
+            </form>
+        </div>
+
+        <!-- Tab: Estadísticas -->
+        <div class="tab-content" id="statsTab">
+            <div class="events-statistics" id="eventsStatistics">
+                <div class="no-events-message" id="noEventsStats">
+                    Conecta tu wallet y crea eventos para ver las estadísticas.
+                </div>
+            </div>
+            <div class="info-panel">
+                <h3>📊 Resumen de Actividad</h3>
+                <p>Aquí puedes ver un resumen completo de todos tus eventos POAP y su rendimiento.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentAccount = null;
+        let hashtags = [];
+        let web3 = null;
+
+        // Elementos DOM
+        const connectBtn = document.getElementById('connectBtn');
+        const statusDot = document.getElementById('statusDot');
+        const walletStatus = document.getElementById('walletStatus');
+        const contractInfo = document.getElementById('contractInfo');
+        const networkName = document.getElementById('networkName');
+        const accountAddress = document.getElementById('accountAddress');
+        const accountBalance = document.getElementById('accountBalance');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loadingPanel = document.getElementById('loadingPanel');
+        const submitBtn = document.getElementById('submitBtn');
+        const hashtagInput = document.getElementById('hashtagInput');
+        const hashtagsContainer = document.getElementById('hashtagsContainer');
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        const durationResult = document.getElementById('durationResult');
+
+        // Verificar si MetaMask está instalado
+        function isMetaMaskInstalled() {
+            return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
+        }
+
+        // Mostrar mensaje de error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Mostrar mensaje de éxito
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Mostrar/ocultar loading
+        function toggleLoading(show) {
+            loadingPanel.style.display = show ? 'block' : 'none';
+        }
+
+        // Conectar a MetaMask
+        async function connectWallet() {
+            if (!isMetaMaskInstalled()) {
+                showError('MetaMask no está instalado. Por favor, instálalo desde https://metamask.io/');
+                return;
+            }
+
+            try {
+                toggleLoading(true);
+                
+                // Solicitar conexión
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                });
+                if (accounts.length > 0) {
+                    currentAccount = accounts[0];
+                    await updateWalletInfo();
+                    showSuccess('Wallet conectado exitosamente');
+                }
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                if (error.code === 4001) {
+                    showError('Conexión rechazada por el usuario');
+                } else {
+                    showError('Error al conectar con MetaMask: ' + error.message);
+                }
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Actualizar información del wallet
+        async function updateWalletInfo() {
+            if (!currentAccount) return;
+
+            try {
+                // Actualizar estado visual
+                statusDot.classList.add('connected');
+                walletStatus.textContent = `Conectado: ${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`;
+                connectBtn.textContent = 'Conectado';
+                connectBtn.disabled = true;
+                submitBtn.disabled = false;
+
+                // Obtener información de la red
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const networkNames = {
+                    '0x1': 'Ethereum Mainnet',
+                    '0x3': 'Ropsten Testnet',
+                    '0x4': 'Rinkeby Testnet',
+                    '0x5': 'Goerli Testnet',
+                    '0x2a': 'Kovan Testnet',
+                    '0x89': 'Polygon Mainnet',
+                    '0x13881': 'Polygon Mumbai',
+                    '0xa86a': 'Avalanche Mainnet',
+                    '0xa869': 'Avalanche Fuji Testnet'
+                };
+
+                // Obtener balance
+                const balance = await window.ethereum.request({
+                    method: 'eth_getBalance',
+                    params: [currentAccount, 'latest']
+                });
+                const balanceInEth = parseInt(balance, 16) / Math.pow(10, 18);
+
+                // Actualizar UI
+                networkName.textContent = networkNames[chainId] || `Red desconocida (${chainId})`;
+                accountAddress.textContent = currentAccount;
+                accountBalance.textContent = balanceInEth.toFixed(4);
+                contractInfo.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error updating wallet info:', error);
+                showError('Error al obtener información del wallet');
+            }
+        }
+
+        // Desconectar wallet
+        function disconnectWallet() {
+            currentAccount = null;
+            statusDot.classList.remove('connected');
+            walletStatus.textContent = 'Desconectado';
+            connectBtn.textContent = 'Conectar MetaMask';
+            connectBtn.disabled = false;
+            submitBtn.disabled = true;
+            contractInfo.style.display = 'none';
+        }
+
+        // Manejar cambios de cuenta
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                disconnectWallet();
+                showError('MetaMask se ha desconectado');
+            } else if (accounts[0] !== currentAccount) {
+                currentAccount = accounts[0];
+                updateWalletInfo();
+                showSuccess('Cuenta cambiada exitosamente');
+            }
+        }
+
+        // Manejar cambios de red
+        function handleChainChanged(chainId) {
+            updateWalletInfo();
+            showSuccess('Red cambiada exitosamente');
+        }
+
+        // Agregar hashtag
+        function addHashtag(tag) {
+            if (tag && !hashtags.includes(tag)) {
+                hashtags.push(tag);
+                renderHashtags();
+            }
+        }
+
+        // Eliminar hashtag
+        function removeHashtag(index) {
+            hashtags.splice(index, 1);
+            renderHashtags();
+        }
+
+        // Renderizar hashtags
+        function renderHashtags() {
+            const container = hashtagsContainer;
+            const input = hashtagInput;
+            
+            // Limpiar tags existentes
+            const existingTags = container.querySelectorAll('.hashtag-tag');
+            existingTags.forEach(tag => tag.remove());
+
+            // Agregar nuevos tags
+            hashtags.forEach((tag, index) => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'hashtag-tag';
+                tagElement.innerHTML = `
+                    #${tag}
+                    <button type="button" class="hashtag-remove" onclick="removeHashtag(${index})">×</button>
+                `;
+                container.insertBefore(tagElement, input);
+            });
+        }
+
+        // Calcular duración en segundos
+        function updateDuration() {
+            const hours = parseInt(hoursInput.value) || 0;
+            const minutes = parseInt(minutesInput.value) || 0;
+            const totalSeconds = (hours * 3600) + (minutes * 60);
+            
+            durationResult.textContent = `Total: ${totalSeconds} segundos`;
+            
+            if (totalSeconds > 0) {
+                const hoursText = hours > 0 ? `${hours}h ` : '';
+                const minutesText = minutes > 0 ? `${minutes}m` : '';
+                durationResult.textContent += ` (${hoursText}${minutesText})`;
+            }
+            
+            return totalSeconds;
+        }
+
+        // Manejar envío del formulario
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            if (!currentAccount) {
+                showError('Por favor, conecta tu wallet primero');
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            const eventCode = formData.get('code').trim();
+            const eventName = formData.get('name').trim();
+            const duration = updateDuration();
+
+            if (!eventCode || !eventName) {
+                showError('Por favor, completa todos los campos obligatorios');
+                return;
+            }
+
+            if (duration <= 0) {
+                showError('La duración del evento debe ser mayor a 0');
+                return;
+            }
+
+            try {
+                toggleLoading(true);
+                
+                // Simular creación del evento (aquí iría la interacción real con el contrato)
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                showSuccess(`Evento "${eventName}" creado exitosamente con código: ${eventCode}`);
+                    
+                // Guardar el evento en localStorage
+                const storedEvents = JSON.parse(localStorage.getItem('myPoapEvents') || '[]');
+                storedEvents.push({
+                    code: eventCode,
+                    name: eventName,
+                    hashtags: [...hashtags],
+                    duration: duration,
+                    createdBy: currentAccount,
+                    participants: [] 
+                });
+                localStorage.setItem('myPoapEvents', JSON.stringify(storedEvents));
+                
+                // Limpiar formulario
+                event.target.reset();
+                hashtags = [];
+                renderHashtags();
+                updateDuration();
+                
+            } catch (error) {
+                console.error('Error creating event:', error);
+                showError('Error al crear el evento: ' + error.message);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Obtener estadísticas de eventos del usuario
+        function getUserEventStats() {
+            const storedEvents = JSON.parse(localStorage.getItem('myPoapEvents') || '[]');
+            return storedEvents.filter(e => e.createdBy === currentAccount);
+        }
+
+        // Renderizar estadísticas de eventos
+        function renderEventStatistics() {
+            const container = document.getElementById('eventsStatistics');
+            container.innerHTML = ''; // Limpiar contenedor primero
+
+            if (!currentAccount) {
+                container.innerHTML = '<div class="no-events-message">Conecta tu wallet para ver las estadísticas.</div>';
+                return;
+            }
+
+            const events = getUserEventStats();
+
+            if (events.length === 0) {
+                container.innerHTML = '<div class="no-events-message">No hay eventos creados aún.</div>';
+                return;
+            }
+
+            events.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.className = 'event-stat-card';
+                eventElement.innerHTML = `
+                    <div class="event-stat-header">
+                        <div class="event-stat-title">${event.name}</div>
+                        <div class="event-stat-code">${event.code}</div>
+                    </div>
+                    
+                    <div class="event-stat-details">
+                        <div class="stat-detail-section">
+                            <div class="stat-detail-title">Hashtags/Menciones</div>
+                            <div class="hashtags-list">
+                                ${event.hashtags.map(tag => `<span class="hashtag-display">#${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="stat-detail-section">
+                            <div class="stat-detail-title">Participantes Registrados</div>
+                            <div class="participants-count">${event.participants.length}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-detail-section">
+                        <div class="stat-detail-title">Lista de Participantes</div>
+                        <div class="participants-list">
+                            ${event.participants.length === 0 
+                                ? '<p style="text-align:center; color: #7f8c8d;">Sin participantes aún</p>'
+                                : event.participants.map(participant => `
+                                    <div class="participant-item">
+                                        <span class="twitter-handle">${participant.twitter}</span>
+                                        <span class="wallet-address">${participant.address}</span>
+                                        <small>${new Date(participant.registeredAt || new Date()).toLocaleString()}</small>
+                                    </div>
+                                `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(eventElement);
+            });
+        }
+
+        // Renderizar mis eventos
+        function renderMyEvents() {
+            const container = document.getElementById('eventsList');
+            container.innerHTML = ''; // Limpiar contenido anterior
+
+            if (!currentAccount) {
+                container.innerHTML = '<div class="no-events-message">Conecta tu wallet para ver tus eventos.</div>';
+                return;
+            }
+
+            const storedEvents = JSON.parse(localStorage.getItem('myPoapEvents') || '[]');
+            const userEvents = storedEvents.filter(e => e.createdBy === currentAccount);
+
+            if (userEvents.length === 0) {
+                container.innerHTML = '<div class="no-events-message">No tienes eventos creados aún.</div>';
+                return;
+            }
+
+            userEvents.forEach(event => {
+                const html = `
+                    <div class="event-card">
+                        <h3>${event.name}</h3>
+                        <p><strong>Código:</strong> ${event.code}</p>
+                        <p><strong>Duración:</strong> ${event.duration} segundos</p>
+                        <p><strong>Hashtags:</strong> ${event.hashtags.map(tag => `#${tag}`).join(', ')}</p>
+                        <p><strong>Participantes:</strong> ${event.participants.length}</p>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        // Rellenar el combo con los eventos disponibles
+        function populateEventSelect() {
+            const select = document.getElementById('eventSelect');
+            select.innerHTML = '<option value="">-- Selecciona --</option>';
+
+            if (!currentAccount) return;
+
+            const events = JSON.parse(localStorage.getItem('myPoapEvents') || '[]');
+            const userEvents = events.filter(e => e.createdBy === currentAccount);
+
+            if (userEvents.length === 0) {
+                select.innerHTML = '<option value="" disabled>No tienes eventos creados</option>';
+                return;
+            }
+
+            userEvents.forEach(event => {
+                const option = document.createElement('option');
+                option.value = event.code;
+                option.textContent = `${event.name} (${event.code}) - ${event.participants.length} participantes`;
+                select.appendChild(option);
+            });
+        }
+
+        // Manejar cambio de pestañas
+        function handleTabChange(event) {
+            if (!event.target.classList.contains('tab')) return;
+
+            // Actualizar pestañas activas
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            const tabId = event.target.getAttribute('data-tab') + 'Tab';
+            document.getElementById(tabId).classList.add('active');
+            
+            // Actualizar el contenido según la pestaña seleccionada
+            switch(event.target.getAttribute('data-tab')) {
+                case 'stats':
+                    renderEventStatistics();
+                    break;
+                case 'register':
+                    populateEventSelect();
+                    break;
+                case 'events':
+                    renderMyEvents();
+                    break;
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listeners
+            connectBtn.addEventListener('click', connectWallet);
+            document.getElementById('poapForm').addEventListener('submit', handleFormSubmit);
+            
+            // Registro de participantes
+            document.getElementById('participantForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (!currentAccount) {
+                    showError('Por favor, conecta tu wallet primero');
+                    return;
+                }
+
+                const code = document.getElementById('eventSelect').value;
+                const twitter = document.getElementById('twitterInput').value.trim();
+                const wallet = document.getElementById('walletInput').value.trim();
+
+                if (!code || !twitter || !wallet) {
+                    showError('Completa todos los campos');
+                    return;
+                }
+
+                // Validación básica de dirección de wallet
+                if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+                    showError('Dirección de wallet inválida');
+                    return;
+                }
+
+                // Validación de formato de Twitter (opcional)
+                if (!twitter.startsWith('@')) {
+                    showError('El usuario de Twitter debe comenzar con @');
+                    return;
+                }
+
+                try {
+                    const events = JSON.parse(localStorage.getItem('myPoapEvents') || []);
+                    const eventIndex = events.findIndex(e => e.code === code && e.createdBy === currentAccount);
+
+                    if (eventIndex === -1) {
+                        showError('Evento no encontrado o no tienes permisos');
+                        return;
+                    }
+
+                    // Verificar si el participante ya está registrado
+                    const isAlreadyRegistered = events[eventIndex].participants.some(
+                        p => p.twitter.toLowerCase() === twitter.toLowerCase() || 
+                             p.address.toLowerCase() === wallet.toLowerCase()
+                    );
+
+                    if (isAlreadyRegistered) {
+                        showError('Este usuario o wallet ya está registrado en el evento');
+                        return;
+                    }
+
+                    // Agregar nuevo participante
+                    events[eventIndex].participants.push({ 
+                        twitter, 
+                        address: wallet,
+                        registeredAt: new Date().toISOString() 
+                    });
+
+                    localStorage.setItem('myPoapEvents', JSON.stringify(events));
+                    showSuccess('¡Registro exitoso!');
+                    e.target.reset();
+                    
+                    // Actualizar estadísticas si estamos en esa pestaña
+                    if (document.querySelector('.tab[data-tab="stats"]').classList.contains('active')) {
+                        renderEventStatistics();
+                    }
+                    
+                    // Actualizar lista de eventos si estamos en esa pestaña
+                    if (document.querySelector('.tab[data-tab="events"]').classList.contains('active')) {
+                        renderMyEvents();
+                    }
+                } catch (error) {
+                    console.error('Error al registrar participante:', error);
+                    showError('Error al registrar participante');
+                }
+            });
+
+            // Eventos para hashtags
+            hashtagInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const tag = this.value.trim().replace('#', '');
+                    if (tag) {
+                        addHashtag(tag);
+                        this.value = '';
+                    }
+                }
+            });
+
+            hashtagInput.addEventListener('blur', function() {
+                const tag = this.value.trim().replace('#', '');
+                if (tag) {
+                    addHashtag(tag);
+                    this.value = '';
+                }
+            });
+
+            // Calculadora de duración
+            hoursInput.addEventListener('input', updateDuration);
+            minutesInput.addEventListener('input', updateDuration);
+
+            // Pestañas
+            document.querySelector('.tabs').addEventListener('click', handleTabChange);
+
+            // Escuchar cambios de cuenta y red
+            if (window.ethereum) {
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', handleChainChanged);
+            }
+
+            // Inicializar duración
+            updateDuration();
+            
+            // Inicializar estadísticas si la pestaña está activa
+            if (document.querySelector('.tab[data-tab="stats"]').classList.contains('active')) {
+                renderEventStatistics();
+            }
+        });
+
+        // Hacer funciones disponibles globalmente
+        window.removeHashtag = removeHashtag;
+        window.renderEventStatistics = renderEventStatistics;
+        window.renderMyEvents = renderMyEvents;
+    </script>
+</body>
+</html>
