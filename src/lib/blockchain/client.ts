@@ -14,6 +14,11 @@ export class BlockchainClient {
     });
   }
 
+  /**
+   * If not exist, create and return the instance of the BlockchainClient
+   * @returns The instance of the BlockchainClient
+   */
+
   public static getInstance(): BlockchainClient {
     if (!BlockchainClient.instance) {
       BlockchainClient.instance = new BlockchainClient();

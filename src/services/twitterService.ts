@@ -1,16 +1,20 @@
 import { apiClient } from '@/lib/axiosInstace';
-import mockData from '@/mocks/twitter-mock.json';
+//import mockData from '@/mocks/twitter-mock.json';
 
 
-
+/**
+ * Extract hashtags and mentions from tweets
+ * @param data The data to extract hashtags and mentions from
+ * @returns An array of arrays of hashtags and mentions
+ */
 async function extractHashtagsAndMentionsFromTweets(data: any): Promise<string[][]> {
     const results: string[][] = [];
     try {
-        const timeline = mockData.data.user_result.result.timeline_response.timeline;
+        const timeline = data.data.data.user_result.result.timeline_response.timeline;
         const addEntriesInstructions = timeline.instructions.filter(
             (instruction: { __typename: string; }) => instruction.__typename === 'TimelineAddEntries'
         );
-        addEntriesInstructions.forEach((instruction) => {
+        addEntriesInstructions.forEach((instruction: any) => {
             if (!instruction.entries) return;
             instruction.entries.forEach((entry: any, index: number) => {
                 try {
