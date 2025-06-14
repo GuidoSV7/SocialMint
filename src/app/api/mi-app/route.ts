@@ -1,33 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { avalancheFuji } from "viem/chains";
 import {
   createMetadata,
   Metadata,
   ValidatedMetadata,
   ExecutionResponse,
 } from "@sherrylinks/sdk";
-import { serialize } from "wagmi";
-import { abi } from "@/blockchain/abi";
-import {
-  encodeFunctionData,
-  TransactionSerializable,
-  http,
-  createPublicClient,
-} from "viem";
 import { checkHashtagsAndMentions } from "@/services/twitterService";
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS as `0x${string}`;
+import { EventService, EventError } from "@/services/eventService";
 
-const publicClient = createPublicClient({
-  chain: avalancheFuji,
-  transport: http(`https://avalanche-fuji.infura.io/v3/${process.env.INFURA_API_KEY}`), // RPC pública de Fuji
-});
+
+
 export async function GET(req: NextRequest) {
-  //todo: averiguar si se puede obtener la address del usuario desde el frontend de sherry
-
   try {
-    const host = req.headers.get("host") || "localhost:3000";
-    const protocol = req.headers.get("x-forwarded-proto") || "http";
-    const serverUrl = `${protocol}://${host}`;
+    // const host = req.headers.get("host") || "localhost:3000";
+    // const protocol = req.headers.get("x-forwarded-proto") || "http";
+    // const serverUrl = `${protocol}://${host}`;
 
     const metadata: Metadata = {
       url: "https://sherry.social",
@@ -65,10 +52,8 @@ export async function GET(req: NextRequest) {
       ],
     };
 
-    // Validar metadata usando el SDK
     const validated: ValidatedMetadata = createMetadata(metadata);
 
-    // Retornar con headers CORS para acceso cross-origin
     return NextResponse.json(validated, {
       headers: {
         "Access-Control-Allow-Origin": "*",
@@ -89,95 +74,62 @@ export async function POST(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const eventCode = searchParams.get("eventCode");
     const userHandler = searchParams.get("userHandler");
-    console.log(eventCode, userHandler);
+
     if (!eventCode || !userHandler) {
+      return NextResponse.json(
+        { error: 'El codigo del evento y el usuario de Twitter son requeridos' },
+        {
+          status: 400,
+          headers: getCorsHeaders(),
+        },
+      );
+    }
+
+    try {
+      const eventData = await EventService.getEvent(eventCode);
+      const isEventValid = await checkHashtagsAndMentions(userHandler, eventData.tags);
+      
+      if (!isEventValid) {
         return NextResponse.json(
-          { error: 'El codigo del evento y el usuario de Twitter son requeridos' },
+          { error: 'No se encontró publicación con los tags del evento' },
           {
             status: 400,
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            },
+            headers: getCorsHeaders(),
           },
         );
       }
 
-    const eventData = await publicClient.readContract({
-      address: CONTRACT_ADDRESS,
-      abi: abi,
-      functionName: "getEvent",
-      args: [eventCode.toLowerCase()],
-    });
-    console.log("Raw event data:", eventData);
-    const parsedData = parseEventData(eventData);
-    console.log("Parsed data:", parsedData);
-    const { tags } = parsedData;
-    console.log("Tags:", tags);
-    if (!tags || tags.length === 0) {
+      const serialized = await EventService.createAddParticipantTransaction(eventCode);
+
+      const resp: ExecutionResponse = {
+        serializedTransaction: serialized,
+        chainId: "fuji",
+      };
+
+      return NextResponse.json(resp, {
+        status: 200,
+        headers: getCorsHeaders(),
+      });
+    } catch (error) {
+      if (error instanceof EventError) {
         return NextResponse.json(
-            { error: 'No se encontró el codigo del evento' },
-            {
-              status: 400,
-              headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-              },
-            },
-          );
+          { error: error.message },
+          {
+            status: error.code === 'EVENT_NOT_FOUND' ? 404 : 500,
+            headers: getCorsHeaders(),
+          },
+        );
+      }
+      throw error;
     }
-
-    const isEventValid = await checkHashtagsAndMentions(userHandler, tags);
-    console.log(isEventValid);
-    if (!isEventValid) {
-        return NextResponse.json(
-            { error: 'No se encontró publicación con los tags del evento' },
-            {
-              status: 400,
-              headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-              },
-            },
-          );
-    }
-
-    const data = encodeFunctionData({
-      abi,
-      functionName: "addParticipant",
-      args: [eventCode],
-    });
-
-    const tx: TransactionSerializable = {
-      to: CONTRACT_ADDRESS,
-      data: data,
-      chainId: avalancheFuji.id,
-      type: "legacy",
-    };
-    // Serializar transacción
-    const serialized = serialize(tx);
-
-    // Crear respuesta
-    const resp: ExecutionResponse = {
-      serializedTransaction: serialized,
-      chainId: avalancheFuji.name,
-    };
-    return NextResponse.json(resp, {
-      status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    });
   } catch (error) {
     console.error("Error en petición POST:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: getCorsHeaders(),
+      }
     );
   }
 }
@@ -185,39 +137,15 @@ export async function POST(req: NextRequest) {
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers":
-        "Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version",
-    },
+    headers: getCorsHeaders(),
   });
 }
 
-interface EventData {
-  poadId: string;
-  name: string;
-  tags: string[];
-  address: string;
-  participantsAddress: any[];
-  startTime: bigint;
-  duration: bigint;
-  closed: boolean;
-  registeredQuantity: bigint;
-}
-
-// Función para parsear los datos del smart contract
-function parseEventData(rawData: any): EventData {
-  console.log("Parsing raw data:", rawData);
+function getCorsHeaders() {
   return {
-    poadId: rawData[0] as string,
-    name: rawData[1] as string,
-    tags: Array.isArray(rawData[2]) ? rawData[2] : [],
-    address: rawData[3] as string,
-    participantsAddress: Array.isArray(rawData[4]) ? rawData[4] : [],
-    startTime: rawData[5] as bigint,
-    duration: rawData[6] as bigint,
-    closed: rawData[7] as boolean,
-    registeredQuantity: rawData[8] as bigint,
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version",
   };
 }
+
