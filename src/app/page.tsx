@@ -2,6 +2,7 @@ import { PoapClaimInterface } from "@/modules/poap/components/PoapCaimInterface"
 
 
 
+
 export default function HomePage() {
-  return <PoapClaimInterface />;
+  <h1>Hola Mundo</h1>
 }

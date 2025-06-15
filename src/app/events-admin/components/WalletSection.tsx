@@ -27,7 +27,9 @@ export default function WalletSection({
       <div className={styles.walletInfo}>
         <div className={styles.walletStatus}>
           <div className={`${styles.statusDot} ${isConnected ? styles.connected : ''}`} />
-          <span>{isConnected ? `Conectado: ${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Desconectado'}</span>
+          <span className={isConnected ? 'text-black' : ''}>
+              {isConnected ? `Conectado: ${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Desconectado'}
+          </span>
         </div>
         <button 
           className={styles.connectBtn}
@@ -40,7 +42,7 @@ export default function WalletSection({
       {isConnected && (
         <div className={styles.contractInfo}>
           <div><strong>Cuenta:</strong> <span>{address}</span></div>
-          <div><strong>Balance:</strong> <span>{balance?.formatted} {balance?.symbol}</span></div>
+          <div ><strong>Balance:</strong> <span>{balance?.formatted} {balance?.symbol}</span></div>
         </div>
       )}
     </div>
