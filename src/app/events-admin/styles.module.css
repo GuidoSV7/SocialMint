@@ -83,6 +83,7 @@
   height: 12px;
   border-radius: 50%;
   background: #e74c3c;
+  
 }
 
 .statusDot.connected {
@@ -118,6 +119,7 @@
   font-family: monospace;
   font-size: 12px;
   margin-top: 15px;
+  color: black
 }
 
 .formSection {
@@ -522,3 +524,5 @@
     align-items: stretch;
   }
 } 
+
+

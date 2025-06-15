@@ -142,6 +142,7 @@ export default function CreateEventTab() {
       <div className={styles.formSection}>
         <label htmlFor="eventCode">Código del Evento *</label>
         <input
+          className='text-black'
           type="text"
           id="eventCode"
           value={eventCode}
@@ -154,6 +155,7 @@ export default function CreateEventTab() {
       <div className={styles.formSection}>
         <label htmlFor="eventName">Nombre del Evento *</label>
         <input
+         className='text-black'
           type="text"
           id="eventName"
           value={eventName}
@@ -166,6 +168,7 @@ export default function CreateEventTab() {
       <div className={styles.formSection}>
         <label htmlFor="poapId">ID del POAP *</label>
         <input
+          className='text-black'
           type="text"
           id="poapId"
           value={poapId}
@@ -177,7 +180,7 @@ export default function CreateEventTab() {
 
       <div className={styles.formSection}>
         <label>Hashtags del Evento</label>
-        <div className={styles.hashtagsContainer}>
+        <div className={styles.hashtagsContainer} >
           {hashtags.map(hashtag => (
             <div key={hashtag.id} className={styles.hashtagTag}>
               #{hashtag.text}
@@ -191,6 +194,7 @@ export default function CreateEventTab() {
             </div>
           ))}
           <input
+          
             type="text"
             className={styles.hashtagInput}
             value={hashtagInput}
@@ -253,6 +257,7 @@ export default function CreateEventTab() {
           <div className={styles.durationInput}>
             <label>Horas</label>
             <input
+              className='text-black'
               type="number"
               value={hours}
               onChange={(e) => setHours(parseInt(e.target.value) || 0)}
@@ -264,6 +269,7 @@ export default function CreateEventTab() {
           <div className={styles.durationInput}>
             <label>Minutos</label>
             <input
+              className='text-black'
               type="number"
               value={minutes}
               onChange={(e) => setMinutes(parseInt(e.target.value) || 0)}
