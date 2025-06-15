@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { EventService, PaginatedEvent } from '@/services/eventService';
+import { formatDuration } from '@/utils/time';
 import styles from '../styles.module.css';
 
 const EVENTS_PER_PAGE = 5;
@@ -80,7 +81,7 @@ export default function EventsTab() {
           <div key={event.code} className={styles.eventCard}>
             <h3>{event.name}</h3>
             <p><strong>Código:</strong> {event.code}</p>
-            <p><strong>Duración:</strong> {Number(event.duration)} segundos</p>
+            <p><strong>Duración:</strong> {formatDuration(event.duration)}</p>
             <p><strong>Hashtags:</strong> {event.hashtags.join(', ')}</p>
             <p><strong>Participantes:</strong> {Number(event.participantCount)}</p>
             <p><strong>Estado:</strong> {event.closed ? 'Cerrado' : 'Abierto'}</p>

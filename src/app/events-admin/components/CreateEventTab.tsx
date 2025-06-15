@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
 import { EventService } from '@/services/eventService';
+import { formatDuration } from '@/utils/time';
 import styles from '../styles.module.css';
 
 interface Hashtag {
@@ -75,9 +76,7 @@ export default function CreateEventTab() {
 
   const calculateDuration = () => {
     const totalSeconds = (hours * 3600) + (minutes * 60);
-    const hoursText = hours > 0 ? `${hours}h ` : '';
-    const minutesText = minutes > 0 ? `${minutes}m` : '';
-    return `${totalSeconds} segundos (${hoursText}${minutesText})`;
+    return formatDuration(totalSeconds);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
