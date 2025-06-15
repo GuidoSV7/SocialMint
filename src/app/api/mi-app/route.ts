@@ -92,13 +92,13 @@ export async function POST(req: NextRequest) {
 
     return successResponse(response);
   } catch (error) {
+    
     if (error instanceof EventError) {
-      const status = error.code === 'EVENT_NOT_FOUND' ? 404 : 500;
-      return errorResponse(status, error.message);
+      // Return the actual error message from the contract
+      return errorResponse(400, error.message);
     }
 
-    console.error("Error en petición POST:", error);
-    return errorResponse(500, "Internal Server Error");
+    return errorResponse(500, "Error interno del servidor");
   }
 }
 

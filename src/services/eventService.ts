@@ -1,5 +1,5 @@
 import { BlockchainClient } from "@/lib/blockchain/client";
-import { encodeFunctionData, TransactionSerializable, WalletClient, PublicClient } from "viem";
+import { encodeFunctionData, TransactionSerializable, WalletClient, PublicClient, ContractFunctionExecutionError } from "viem";
 import { avalancheFuji } from "viem/chains";
 import { serialize } from "wagmi";
 
@@ -51,11 +51,28 @@ export class EventService {
   private static blockchainClient = BlockchainClient.getInstance();
 
   /**
-     * Get the event data from the blockchain
-     * @param eventCode The code of the event to get
-     * @returns The event data
-     * @throws EventError if the event is not found or if there is an error fetching the event data
-     */
+   * Extract the revert reason from a contract error
+   * @param error The error object from the contract call
+   * @returns The revert reason or a default message
+   */
+  private static extractRevertReason(error: unknown): string {
+    if (error instanceof ContractFunctionExecutionError) {
+      // Extract just the revert reason from the error message
+      const match = error.message.match(/reverted with the following reason:\n(.*?)(?:\n\n|$)/);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+      return error.message;
+    }
+    return 'Error desconocido';
+  }
+
+  /**
+   * Get the event data from the blockchain
+   * @param eventCode The code of the event to get
+   * @returns The event data
+   * @throws EventError if the event is not found or if there is an error fetching the event data
+   */
   static async getEvent(eventCode: string): Promise<EventData> {
     try {
       const eventData = await this.blockchainClient.getClient().readContract({
@@ -73,13 +90,9 @@ export class EventService {
 
       return parsedData;
     } catch (error) {
-      if (error instanceof EventError) {
-        throw error;
-      }
-      throw new EventError(
-        'Failed to fetch event data',
-        'FETCH_EVENT_ERROR'
-      );
+      console.log('Error fetching event:', error);
+      const revertReason = this.extractRevertReason(error);
+      throw new EventError(revertReason, 'EVENT_ERROR');
     }
   }
 
@@ -106,10 +119,8 @@ export class EventService {
 
       return serialize(tx);
     } catch (error) {
-      throw new EventError(
-        'Failed to create transaction',
-        'CREATE_TRANSACTION_ERROR'
-      );
+      const revertReason = this.extractRevertReason(error);
+      throw new EventError(revertReason, 'TRANSACTION_ERROR');
     }
   }
 
@@ -186,11 +197,9 @@ export class EventService {
 
       return hash;
     } catch (error) {
-      console.log('Error creating event', error);
-      throw new EventError(
-        'Failed to create event transaction',
-        'CREATE_EVENT_ERROR'
-      );
+      console.log('Error creating event:', error);
+      const revertReason = this.extractRevertReason(error);
+      throw new EventError(revertReason, 'CREATE_EVENT_ERROR');
     }
   }
 
@@ -248,10 +257,8 @@ export class EventService {
         totalEvents
       };
     } catch (error) {
-      throw new EventError(
-        'Failed to fetch paginated events',
-        'FETCH_EVENTS_ERROR'
-      );
+      const revertReason = this.extractRevertReason(error);
+      throw new EventError(revertReason, 'FETCH_EVENTS_ERROR');
     }
   }
 } 
