@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     const metadata: Metadata = {
       url: "https://sherry.social",
-      icon: "https://social-mint-hackaton.vercel.app/social-mint-bg.jpeg",
+      icon: "https://social-mint-hackaton.vercel.app/social-mint-bg.jpg",
       title: "Social Mint",
       baseUrl: serverUrl,
       description:
