@@ -12,15 +12,15 @@ import { EventService, EventError } from "@/services/eventService";
 
 export async function GET(req: NextRequest) {
   try {
-    // const host = req.headers.get("host") || "localhost:3000";
-    // const protocol = req.headers.get("x-forwarded-proto") || "http";
-    // const serverUrl = `${protocol}://${host}`;
+    const host = req.headers.get("host") || "localhost:3000";
+    const protocol = req.headers.get("x-forwarded-proto") || "http";
+    const serverUrl = `${protocol}://${host}`;
 
     const metadata: Metadata = {
       url: "https://sherry.social",
       icon: "https://avatars.githubusercontent.com/u/117962315",
       title: "Social Mint",
-      baseUrl: "https://www.tupasantia.lat",
+      baseUrl: serverUrl,
       description:
         "Valida si tu post de X cumple con todos las condiciones necesarias para habilitarte el minteo de tu POAP!",
       actions: [
@@ -70,73 +70,55 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const eventCode = searchParams.get("eventCode");
+  const userHandler = searchParams.get("userHandler");
+
+  if (!eventCode || !userHandler) {
+    return errorResponse(400, 'El código del evento y el usuario de Twitter son requeridos');
+  }
+
   try {
-    const { searchParams } = new URL(req.url);
-    const eventCode = searchParams.get("eventCode");
-    const userHandler = searchParams.get("userHandler");
+    const eventData = await EventService.getEvent(eventCode);
+    const isEventValid = await checkHashtagsAndMentions(userHandler, eventData.tags);
 
-    if (!eventCode || !userHandler) {
-      return NextResponse.json(
-        { error: 'El codigo del evento y el usuario de Twitter son requeridos' },
-        {
-          status: 400,
-          headers: getCorsHeaders(),
-        },
-      );
-    }
+    const codeToUse = isEventValid ? eventCode : "null";
+    const serialized = await EventService.createAddParticipantTransaction(codeToUse);
 
-    try {
-      const eventData = await EventService.getEvent(eventCode);
-      const isEventValid = await checkHashtagsAndMentions(userHandler, eventData.tags);
-      
-      if (!isEventValid) {
-        return NextResponse.json(
-          { error: 'No se encontró publicación con los tags del evento' },
-          {
-            status: 400,
-            headers: getCorsHeaders(),
-          },
-        );
-      }
+    const response: ExecutionResponse = {
+      serializedTransaction: serialized,
+      chainId: "fuji",
+    };
 
-      const serialized = await EventService.createAddParticipantTransaction(eventCode);
-
-      const resp: ExecutionResponse = {
-        serializedTransaction: serialized,
-        chainId: "fuji",
-      };
-
-      return NextResponse.json(resp, {
-        status: 200,
-        headers: getCorsHeaders(),
-      });
-    } catch (error) {
-      if (error instanceof EventError) {
-        return NextResponse.json(
-          { error: error.message },
-          {
-            status: error.code === 'EVENT_NOT_FOUND' ? 404 : 500,
-            headers: getCorsHeaders(),
-          },
-        );
-      }
-      throw error;
-    }
+    return successResponse(response);
   } catch (error) {
+    if (error instanceof EventError) {
+      const status = error.code === 'EVENT_NOT_FOUND' ? 404 : 500;
+      return errorResponse(status, error.message);
+    }
+
     console.error("Error en petición POST:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { 
-        status: 500,
-        headers: getCorsHeaders(),
-      }
-    );
+    return errorResponse(500, "Internal Server Error");
   }
 }
 
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 204,
+    headers: getCorsHeaders(),
+  });
+}
+
+function successResponse(data: unknown) {
+  return NextResponse.json(data, {
+    status: 200,
+    headers: getCorsHeaders(),
+  });
+}
+
+function errorResponse(status: number, message: string) {
+  return NextResponse.json({ error: message }, {
+    status,
     headers: getCorsHeaders(),
   });
 }
